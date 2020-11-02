@@ -6,125 +6,86 @@ using namespace std;
 
 struct Item						// Динамический список
 {
-	int item;					// Элемент
-	Item* pr;					// Указатель на предыдущий
-	Item* next;					// Указатель на следующий
+	int data;					// Элемент
+	Item* prev = NULL;			// Указатель на предыдущий
 };
 
 class Stack
 {
 private:
-	Item* last;					// Указатель на последний элемент
-	Item* first;				// Указатель на первый элемент
+	Item* Head;					// Указатель на первый элемент
+	Item* Tail;					// Указатель на последний элемент
 	int size;					// Кол-во элементов
 public:
 	Stack();					// Конструктор
-	~Stack();					// Деструктор
 
-	void create();				// Создание списка
-	void add(int a);			// Добавление элемента (a) в список
-	int get(int x);				// Взять (x) элементов из списка и удалить их
-	void print();				// Вывод элементов на экран
+	void add(int a);			// Добавление элемента (a)
+	int value();				// Значение последнего элемента
+	bool empty();				// Проверка пустой ли стек
+	void del();					// Удалить элемент
+	
+	int get(int x);				// Взять (x)ый элемент
 	void sort();				// Сортировка элементов
-	void change(int n, int m);	// Заменить (m)ный элемент списка на значение n
+	void swap(int a, int b);	// Поменять элементы (a) и (b) местами
+	void set(int n, int m);		// Заменить (n)ый элемент на значение m
 };
 
 Stack::Stack()
 {
-	size = 20;
-	Item* last = NULL;
-	Item* first = NULL;
-}
-
-Stack:: ~Stack()
-{
-	Item* k;
-	for (int i = size - 1; i > 0; i--)
-	{
-		Item* k = first;
-		first = first->next;
-		delete(k);
-		first->pr = NULL;
-	}
-	first = NULL;
-	last = NULL;
 	size = 0;
+	Item* Head = NULL;
+	Item* Tail = NULL;
 }
 
-void Stack::create()
+void Stack::add(int m)
 {
-	vector<int> a;
-	for (int i = 0; i < size; i++)
-		a.push_back((int)rand() % 200 - 100);
-	for (int i = size - 1; i >= 0; i--)
-		add(a[i]);
-}
-
-void Stack::add(int a)
-{
-	Item* k;
-	k = new Item;
-	if (!last)
-	{
-		last = k;
-		last->next = NULL;
-	}
+	Item* temp = new Item;
+	temp->data = m;
+	temp->prev = Tail;
+	if (size == 0)
+		Head = Tail = temp;
 	else
-		first->pr = k;
-	k->item = a;
-	k->next = first;
-	first = k;
-	first->pr = NULL;
+		Tail = temp;
+	size++;
 }
 
-
-int Stack::get(int x)
+int Stack::value()
 {
-	vector<int>v;
-	if (x != size - 1)
-	{
-		for (int i = x; i >= 0; i--)
-		{
-			Item* k = first;
-			v.push_back(k->item);
-			first = first->next;
-			delete(k);
-			first->pr = NULL;
-		}
-	}
-	else
-	{
-		for (int i = x; i > 0; i--)
-		{
-			Item* k = first;
-			v.push_back(k->item);
-			first = first->next;
-			delete(k);
-			first->pr = NULL;
-		}
-		v.push_back(first->item);
-		first = NULL;
-		last = NULL;
-	}
-	for (int i = x; i >= 0; i--)
-		add(v[i]);
-	return v[x];
+	return Tail->data;
 }
 
-void Stack::print()
+//bool Stack::empty()
+//{
+//
+//}
+
+void Stack::del()
 {
-	Item* k = first;
-	while (k)
+	Item* Del = Tail;
+	Tail = Tail->prev;
+	delete Del;
+	size--;
+}
+
+int Stack::get(int n)
+{
+	Stack temp;
+	while (size - 1 != n)
 	{
-		cout << k->item << " ";
-		k = k->next;
+		temp.add(value());
+		del();
 	}
-	cout << endl;
+	int a = value();
+	while (temp.size != 0)
+	{
+		add(temp.value());
+		temp.del();
+	}
+	return a;
 }
 
 void Stack::sort()
 {
-	int x, y;
 	for (int j = 0; j < size; j++)
 	{
 		for (int i = size / 2 - 1 - j / 2; i > -1; i--)
@@ -135,82 +96,67 @@ void Stack::sort()
 				{
 					if (get(i) < get(2 * i + 1))
 					{
-						x = get(i);
-						y = get(2 * i + 1);
-						change(y, i);
-						change(x, 2 * i + 1);
+						swap(i, 2 * i + 1);
 					}
 				}
 				else
 					if (get(i) < get(2 * i + 2))
 					{
-						x = get(i);
-						y = get(2 * i + 2);
-						change(y, i);
-						change(x, 2 * i + 2);
+						swap(i, 2 * i + 2);
 					}
 			}
 			else
 				if (2 * i + 1 <= size - 1 - j)
 					if (get(i) < get(2 * i + 1))
-					{
-						x = get(i);
-						y = get(2 * i + 1);
-						change(y, i);
-						change(x, 2 * i + 1);
-					}
+						swap(i, 2 * i + 1);
 		}
-		x = get(0);
-		y = get(size - 1 - j);
-		change(y, 0);
-		change(x, size - 1 - j);
+		swap(0, size - 1 - j);
 	}
 }
 
-void Stack::change(int n, int m)
+void Stack::swap(int a, int b)
 {
-	vector<int>v;
-	if (m != size - 1)
-	{
-		for (int i = m; i >= 0; i--)
-		{
-			Item* k = first;
-			v.push_back(k->item);
-			first = first->next;
-			delete(k);
-			first->pr = NULL;
-		}
-	}
-	else
-	{
-		for (int i = m; i > 0; i--)
-		{
-			Item* k = first;
-			v.push_back(k->item);
-			first = first->next;
-			delete(k);
-			first->pr = NULL;
-		}
-		v.push_back(first->item);
-		first = NULL;
-		last = NULL;
-	}
-	v[m] = n;
-	for (int i = m; i >= 0; i--)
-		add(v[i]);
+	int x = get(a);
+	int y = get(b);
+	set(b, x);
+	set(a, y);
 }
+
+void Stack::set(int n, int m)
+{
+	Stack temp;
+	while (size - 1 != n)
+	{
+		temp.add(value());
+		del();
+	}
+	del();
+	add(m);
+	while (temp.size != 0)
+	{
+		add(temp.value());
+		temp.del();
+	}
+}
+
 
 int main()
 {
 	setlocale(LC_ALL, "Rus");
 	srand(time(0));
+	int N = 10;
 
 	Stack mystack;
-	mystack.create();
+	for (int i = N - 1; i >= 0; i--)
+		mystack.add((int)rand() % 200 - 100);
 	cout << "Первоначальный список:\n";
-	mystack.print();
+	for (int i = N - 1; i > -1; i--)
+		cout << " " << mystack.get(i);
+	cout << endl;
 	mystack.sort();
 	cout << "Отсортированный список:\n";
-	mystack.print();
+	for (int i = N - 1; i > -1; i--)
+		cout << " " << mystack.get(i);
+	cout << endl;
 	return 0;
 }
